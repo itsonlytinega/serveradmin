@@ -1,18 +1,16 @@
 const form = document.querySelector("form"),
   emailField = form.querySelector(".email-field"),
   emailInput = emailField.querySelector(".email"),
-  passField = form.querySelector(".create-password"),
-  passInput = passField.querySelector(".password"),
-  cPassField = form.querySelector(".confirm-password"),
-  cPassInput = cPassField.querySelector(".cPassword");
+  passField = form.querySelector(".password-field"), // Changed class to reflect password field
+  passInput = passField.querySelector(".password");
 
-// Email Validtion
+// Email Validation
 function checkEmail() {
-  const emaiPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
-  if (!emailInput.value.match(emaiPattern)) {
-    return emailField.classList.add("invalid"); //adding invalid class if email value do not mathced with email pattern
+  const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+  if (!emailInput.value.match(emailPattern)) {
+    return emailField.classList.add("invalid"); // Adding invalid class if email value doesn't match
   }
-  emailField.classList.remove("invalid"); //removing invalid class if email value matched with emaiPattern
+  emailField.classList.remove("invalid"); // Removing invalid class if email value matches
 }
 
 // Hide and show password
@@ -20,7 +18,7 @@ const eyeIcons = document.querySelectorAll(".show-hide");
 
 eyeIcons.forEach((eyeIcon) => {
   eyeIcon.addEventListener("click", () => {
-    const pInput = eyeIcon.parentElement.querySelector("input"); //getting parent element of eye icon and selecting the password input
+    const pInput = eyeIcon.parentElement.querySelector("input"); // Getting parent element of eye icon and selecting the password input
     if (pInput.type === "password") {
       eyeIcon.classList.replace("bx-hide", "bx-show");
       return (pInput.type = "text");
@@ -30,43 +28,36 @@ eyeIcons.forEach((eyeIcon) => {
   });
 });
 
-// Password Validation
-function createPass() {
-  const passPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-  if (!passInput.value.match(passPattern)) {
-    return passField.classList.add("invalid"); //adding invalid class if password input value do not match with passPattern
-  }
-  passField.classList.remove("invalid"); //removing invalid class if password input value matched with passPattern
-}
-
-// Confirm Password Validtion
-function confirmPass() {
-  if (passInput.value !== cPassInput.value || cPassInput.value === "") {
-    return cPassField.classList.add("invalid");
-  }
-  cPassField.classList.remove("invalid");
-}
-
-// Calling Funtion on Form Sumbit
+// Calling Function on Form Submit
 form.addEventListener("submit", (e) => {
-  e.preventDefault(); //preventing form submitting
+  e.preventDefault(); // Preventing form submission
   checkEmail();
-  createPass();
-  confirmPass();
 
-  //calling function on key up
+  // Calling function on key up
   emailInput.addEventListener("keyup", checkEmail);
-  passInput.addEventListener("keyup", createPass);
-  cPassInput.addEventListener("keyup", confirmPass);
 
-  if (
-    !emailField.classList.contains("invalid") &&
-    !passField.classList.contains("invalid") &&
-    !cPassField.classList.contains("invalid")
-  ) {
-    alert('Login successful!');
-    // Reset form fields
-    form.reset();
+  if (!emailField.classList.contains("invalid")) {
+    // If the email is valid, proceed to send a request to the server
+    const formData = new FormData(form); // Create a FormData object from the form
+
+    fetch("login.php", { // Specify your PHP login script here
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json()) // Expect a JSON response
+      .then((data) => {
+        if (data.success) {
+          alert('Login successful!'); // Show success message
+          // Optionally, redirect to another page
+          window.location.href = "welcome.php"; // Change to your desired page
+        } else {
+          alert('Login failed: ' + data.message); // Show error message
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again later.');
+      });
   }
 });
+

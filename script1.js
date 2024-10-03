@@ -92,9 +92,33 @@ form.addEventListener("submit", (e) => {
     !emailField.classList.contains("invalid") &&
     !passField.classList.contains("invalid") &&
     !cPassField.classList.contains("invalid")
-  ) {
-    alert('Signup successful!');
-    // Reset form fields
-    form.reset();
+  ) { {
+    // Prepare data to be sent to the server
+    const formData = new FormData();
+    formData.append("name", nameInput.value);
+    formData.append("username", usernameInput.value);
+    formData.append("email", emailInput.value);
+    formData.append("password", passInput.value);
+
+    try {
+      const response = await fetch("signup.php", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('Signup successful!');
+        // Reset form fields
+        form.reset();
+      } else {
+        alert(result.message); // Show error message from the server
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred during signup. Please try again.');
+    }
+  }
   }
 });
